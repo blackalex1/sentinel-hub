@@ -1,0 +1,9 @@
+{
+  "plugin_name": "App Launcher",
+  "plugin_description": "Quickly launch programs on your PC directly from your tablet.",
+  "apps_label": "Applications",
+  "add_app": "Add Application",
+  "remove_app": "Remove",
+  "launch_success": "Launched successfully: {}",
+  "launch_error": "Launch error: {}"
+}

@@ -1,0 +1,54 @@
+{
+  "id": "pc_system",
+  "name": "Система",
+  "type": "system_control",
+  "name_en": "System Control",
+  "version": "1.2.0",
+  "author_name": "BlackAlex1",
+  "author": "https://github.com/blackalex1",
+  "author_url": "https://github.com/blackalex1",
+  "links": [
+    { "label": "GitHub", "url": "https://github.com/blackalex1" }
+  ],
+  "description": "Управление питанием и сессией ПК: сон, выключение, блокировка и перезагрузка.",
+  "description_en": "PC power and session management: sleep, shutdown, lock, and restart.",
+  "widgets": [
+    {
+      "id": "system_buttons",
+      "type": "button_group",
+      "label": "Питание и сессия",
+      "label_en": "Power & Session",
+      "buttons": [
+        {
+          "label": "Сон",
+          "label_en": "Sleep",
+          "action": "sleep",
+          "icon": "Moon",
+          "need_confirm": true
+        },
+        {
+          "label": "Выкл.",
+          "label_en": "Shutdown",
+          "action": "shutdown",
+          "icon": "Power",
+          "color": "#ef4444",
+          "need_confirm": true
+        },
+        {
+          "label": "Блок.",
+          "label_en": "Lock",
+          "action": "lock",
+          "icon": "Lock"
+        },
+        {
+          "label": "Рестарт",
+          "label_en": "Restart",
+          "action": "restart",
+          "icon": "RefreshCw",
+          "color": "#f59e0b",
+          "need_confirm": true
+        }
+      ]
+    }
+  ]
+}

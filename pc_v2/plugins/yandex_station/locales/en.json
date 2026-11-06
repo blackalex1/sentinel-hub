@@ -1,0 +1,15 @@
+{
+  "plugin_name": "Yandex Station",
+  "plugin_description": "Integration with Yandex smart speakers for media control and status monitoring.",
+  "speaker": "Speaker",
+  "loading": "Loading...",
+  "wizard_title": "Yandex Station Setup",
+  "wizard_desc": "Select speakers and control mode.",
+  "tablet_control_label": "Control directly from tablet (low latency)",
+  "refresh_discovery": "Refresh speakers",
+  "login_yandex": "Log in to Yandex (QR)",
+  "scan_qr": "Scan QR code to log in:",
+  "qr_waiting": "Waiting for scan...",
+  "qr_success": "Login successful!",
+  "qr_error": "Login error"
+}

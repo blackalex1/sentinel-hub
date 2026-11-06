@@ -1,0 +1,8 @@
+{
+  "plugin_name": "Yandex Music Lyrics",
+  "plugin_description": "Synchronized lyrics for Yandex Station and Yandex Music app.",
+  "loading": "Loading...",
+  "lyrics_not_available": "Lyrics not available",
+  "fetching": "Fetching lyrics...",
+  "lyrics_title": "LYRICS"
+}

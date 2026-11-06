@@ -1,0 +1,51 @@
+{
+  "id": "pc_disks",
+  "name": "Жесткие Диски ПК",
+  "type": "disks_stats",
+  "version": "1.2.0",
+  "author_name": "BlackAlex1",
+  "author": "https://github.com/blackalex1",
+  "author_url": "https://github.com/blackalex1",
+  "links": [
+    {
+      "label": "GitHub",
+      "url": "https://github.com/blackalex1"
+    }
+  ],
+  "description": "Мониториринг занятого места на жестких дисках.",
+  "has_settings": true,
+  "monitored_disks": [],
+  "show_new_disks": true,
+  "dependencies": [
+    "system_stats"
+  ],
+  "widgets": [
+    {
+      "id": "disks_list",
+      "type": "list",
+      "list_key": "disks",
+      "label": "local_disk",
+      "item_label_key": "device",
+      "item_value_key": "percent",
+      "item_secondary_key": "free_text",
+      "icon": "HardDrive",
+      "color_ranges": [
+        {
+          "min": 0,
+          "max": 80,
+          "color": "#38bdf8"
+        },
+        {
+          "min": 80,
+          "max": 90,
+          "color": "#f59e0b"
+        },
+        {
+          "min": 90,
+          "max": 100,
+          "color": "#ef4444"
+        }
+      ]
+    }
+  ]
+}

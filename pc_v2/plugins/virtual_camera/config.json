@@ -1,0 +1,12 @@
+{
+    "id": "virtual_camera",
+    "name": "MonitHome Camera",
+    "type": "camera",
+    "version": "1.0.0",
+    "author_name": "BlackAlex1",
+    "author": "https://github.com/blackalex1",
+    "author_url": "https://github.com/blackalex1",
+    "description": "Виртуальная веб-камера из вашего планшета.",
+    "has_settings": false,
+    "requires_admin": "if_required"
+}

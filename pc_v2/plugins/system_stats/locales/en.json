@@ -1,0 +1,14 @@
+{
+  "plugin_name": "System Stats",
+  "plugin_description": "Real-time monitoring of CPU load, RAM usage, and core system temperatures.",
+  "cpu_usage": "CPU Load",
+  "cpu_temp": "CPU Temp",
+  "gpu_usage": "GPU Load",
+  "gpu_temp": "GPU Temp",
+  "ram_label": "RAM",
+  "ram_percent": "RAM (%)",
+  "ram_percent_label": "RAM (%)",
+  "ram_combined_label": "RAM (Used / Total)",
+  "wizard_title": "Monitoring Setup",
+  "wizard_desc": "Select the sensors you want to display on the dashboard."
+}

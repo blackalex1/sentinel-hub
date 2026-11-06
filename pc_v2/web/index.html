@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MonitHome PC Settings</title>
+    <link rel="icon" type="image/png" href="/static/favicon.png">
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <!-- Socket.IO & Chart.js -->
+    <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar glass-panel">
+            <div class="logo">
+                <span class="logo-icon"></span>
+                <h1>MonitHome</h1>
+            </div>
+            <ul class="nav-links">
+                <li class="active"><a href="#" data-target="plugins-section" data-i18n="nav_plugins">Plugin Manager</a>
+                </li>
+                <li><a href="#" data-target="logs-section" data-i18n="nav_logs">Server Logs</a></li>
+                <li><a href="#" data-target="devices-section" data-i18n="nav_devices">Connected Devices</a></li>
+                <li><a href="#" data-target="settings-section" data-i18n="nav_settings">Global Settings</a></li>
+                <li><a href="#" data-target="about-section" data-i18n="nav_about">About</a></li>
+            </ul>
+            <monit-status></monit-status>
+            <script type="module" src="/static/js/components/monit-status.js"></script>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <div class="top-bar">
+                <monit-stat key="cpu" label="CPU" unit="%"></monit-stat>
+                <monit-stat key="ram" label="RAM" unit="%"></monit-stat>
+                <monit-stat key="temp" label="TEMP" unit="°C"></monit-stat>
+            </div>
+            
+            <script type="module" src="/static/js/components/monit-stat.js"></script>
+
+            <!-- Plugins Section -->
+            <section id="plugins-section" class="content-section active">
+                <header class="section-header">
+                    <h2 data-i18n="nav_plugins">Plugin Manager</h2>
+                    <p data-i18n="plugins_desc">Enable or disable modules for monitoring and control.</p>
+                </header>
+
+                <monit-plugins-list id="plugins-list"></monit-plugins-list>
+                <script type="module" src="/static/js/components/monit-plugins-list.js"></script>
+            </section>
+
+            <!-- Server Logs Section -->
+            <monit-log-panel id="logs-section" class="content-section"></monit-log-panel>
+            <script type="module" src="/static/js/components/monit-log-panel.js"></script>
+
+            <!-- Connected Devices Section -->
+            <monit-devices-list id="devices-section" class="content-section"></monit-devices-list>
+            <script type="module" src="/static/js/components/monit-devices-list.js"></script>
+
+            <!-- Global Settings Section -->
+            <monit-settings-form id="settings-section" class="content-section"></monit-settings-form>
+            <script type="module" src="/static/js/components/monit-settings-form.js"></script>
+
+            <!-- About Section -->
+            <section id="about-section" class="content-section">
+                <header class="section-header">
+                    <h2 data-i18n="nav_about">About</h2>
+                </header>
+                <div class="glass-panel p-4">
+                    <p data-i18n="about_desc">MonitHome Desktop Backend.</p>
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- Modal for Plugin Specific Settings (e.g. QR Code) -->
+    <div class="modal-overlay hidden" id="action-modal">
+        <div class="modal glass-panel" id="modal-container">
+            <div class="modal-header">
+                <h3 id="modal-title">Action Required</h3>
+                <button id="modal-close">&times;</button>
+            </div>
+            <div class="modal-body" id="modal-content">
+                <!-- Dynamic content (e.g. QR image) -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script type="module" src="/static/js/main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Environments
+.env
+.venv
+env/
+venv/
+venv*/
+ENV/
+
+# Executables & Binaries
+*.exe
+bin/*.exe
+dist/
+build/
+*.spec
+
+# Logs & Database
+*.log
+*.db
+*.db-journal
+master_config.json
+secrets.json
+
+# IDE settings
+.idea/
+.vscode/
+
+# Unit test cache
+.pytest_cache/
+htmlcov/
+.coverage
+
+# Security keys & certificates (never commit private keys)
+keys/
+bin/keys/
+*.pem
+
+# Telemetry
+antigravity_metrics.json
+lrclib_test.json

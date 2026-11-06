@@ -1,0 +1,12 @@
+{
+  "id": "keenetic_mihomo",
+  "name": "Keenetic & Mihomo",
+  "version": "1.0.0",
+  "author_name": "BlackAlex1",
+  "has_settings": true,
+  "hidden": false,
+  "description": "Мониторинг Keenetic и управление прокси-сервером Mihomo (Clash).",
+  "router_ip": "192.168.1.1",
+  "router_login": "admin",
+  "mihomo_port": 9097
+}

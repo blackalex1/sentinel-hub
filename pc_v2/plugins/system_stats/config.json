@@ -1,0 +1,68 @@
+{
+    "id": "system_stats",
+    "name": "Системные Датчики (Stats)",
+    "type": "system_stats",
+    "version": "1.2.0",
+    "author_name": "BlackAlex1",
+    "author": "https://github.com/blackalex1",
+    "author_url": "https://github.com/blackalex1",
+    "links": [
+        {
+            "label": "GitHub",
+            "url": "https://github.com/blackalex1"
+        }
+    ],
+    "description": "Глубокий мониторинг CPU/GPU/RAM через WMI и LibreHardwareMonitor.",
+    "has_settings": true,
+    "requires_admin": "if_required",
+    "enabled_sensors": {
+        "cpu_load": true,
+        "cpu_temp": true,
+        "gpu_load": true,
+        "gpu_temp": true,
+        "ram": true
+    },
+    "widgets": [
+        {
+            "id": "cpu_chart",
+            "type": "chart",
+            "label": "cpu_usage",
+            "data_key": "cpu",
+            "color": "#38bdf8",
+            "icon": "cpu"
+        },
+        {
+            "id": "cpu_temp_chart",
+            "type": "chart",
+            "label": "cpu_temp",
+            "data_key": "cpu_temp",
+            "color": "#ef4444",
+            "unit": "°C",
+            "icon": "cpu"
+        },
+        {
+            "id": "gpu_load_widget",
+            "type": "stat",
+            "label": "gpu_load",
+            "data_key": "display_gpu_load",
+            "icon": "gpu",
+            "color": "#10b981"
+        },
+        {
+            "id": "gpu_temp_widget",
+            "type": "stat",
+            "label": "gpu_temp",
+            "data_key": "display_gpu_temp",
+            "icon": "gpu",
+            "color": "#f59e0b"
+        },
+        {
+            "id": "ram_combined_widget",
+            "type": "stat",
+            "label": "ram_label",
+            "data_key": "display_ram_combined",
+            "icon": "ram",
+            "unit": "%"
+        }
+    ]
+}

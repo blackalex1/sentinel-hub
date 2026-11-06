@@ -1,0 +1,8 @@
+{
+  "id": "sys_info",
+  "name": "Sys Info (Базовый)",
+  "version": "2.0.0",
+  "author_name": "BlackAlex1",
+  "hidden": true,
+  "description": "Базовый мониторинг CPU и RAM через psutil. (Пример плагина)."
+}

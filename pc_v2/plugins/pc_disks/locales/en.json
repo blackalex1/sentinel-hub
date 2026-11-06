@@ -1,0 +1,9 @@
+{
+  "plugin_name": "Disk Monitoring",
+  "plugin_description": "Monitor free space and health of your local drives.",
+  "local_disk": "Local Disk",
+  "free_of": "Free: {free} GB of {total} GB",
+  "wizard_title": "Disk Settings",
+  "wizard_desc": "Select local disks for monitoring.",
+  "disk": "Disk"
+}

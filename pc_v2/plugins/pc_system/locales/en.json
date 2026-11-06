@@ -1,0 +1,15 @@
+{
+  "plugin_name": "System Control",
+  "plugin_description": "Manage PC power states (Shutdown, Restart, Sleep) and screen lock from your mobile device.",
+  "wizard_title": "System Commands",
+  "wizard_desc": "Select commands to control PC.",
+  "lock": "Lock Screen",
+  "lock_short": "Lock",
+  "sleep": "Sleep Mode",
+  "sleep_short": "Sleep",
+  "restart": "Restart",
+  "restart_short": "Restart",
+  "shutdown": "Shutdown",
+  "shutdown_short": "Off",
+  "power_group": "Power & Session"
+}

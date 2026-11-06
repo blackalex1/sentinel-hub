@@ -1,0 +1,20 @@
+{
+    "id": "sentinel_music",
+    "name": "Sentinel Music",
+    "name_en": "Sentinel Music",
+    "type": "media_source",
+    "version": "1.0.0",
+    "author_name": "BlackAlex1",
+    "author_url": "https://github.com/blackalex1",
+    "description": "Интеграция с персональным сервером Sentinel Music (Sentinel Connect, караоке).",
+    "has_settings": true,
+    "server_url": "http://127.0.0.1:8000",
+    "auto_connect": true,
+    "widgets": [
+        {
+            "id": "sentinel_media_center",
+            "type": "unified_media",
+            "label": "Sentinel Music"
+        }
+    ]
+}

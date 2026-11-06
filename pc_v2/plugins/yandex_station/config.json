@@ -1,0 +1,26 @@
+{
+    "id": "yandex_station",
+    "name": "Яндекс Станции",
+    "type": "media_source",
+    "version": "1.1.0",
+    "author_name": "BlackAlex1",
+    "author_url": "https://github.com/blackalex1",
+    "author": "https://github.com/blackalex1",
+    "links": [
+        {
+            "label": "GitHub",
+            "url": "https://github.com/blackalex1"
+        }
+    ],
+    "description": "Управление Яндекс Станциями через локальное API Glagol.",
+    "has_settings": true,
+    "dependencies": [],
+    "tablet_control": true,
+    "widgets": [
+        {
+            "id": "yandex_media_center",
+            "type": "unified_media",
+            "label": "Яндекс Станция"
+        }
+    ]
+}

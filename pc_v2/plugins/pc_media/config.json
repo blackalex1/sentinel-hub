@@ -1,0 +1,25 @@
+{
+  "id": "pc_media",
+  "name": "Медиа",
+  "type": "media_source",
+  "version": "1.2.0",
+  "author_name": "BlackAlex1",
+  "author": "https://github.com/blackalex1",
+  "author_url": "https://github.com/blackalex1",
+  "links": [
+    {
+      "label": "GitHub",
+      "url": "https://github.com/blackalex1"
+    }
+  ],
+  "description": "Управление громкостью и воспроизведением системного плеера Windows.",
+  "has_settings": false,
+  "pc_enabled": true,
+  "widgets": [
+    {
+      "id": "unified_media_center",
+      "type": "unified_media",
+      "label": "Управление Медиа"
+    }
+  ]
+}

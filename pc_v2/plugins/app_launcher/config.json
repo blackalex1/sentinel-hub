@@ -1,0 +1,56 @@
+{
+  "id": "app_launcher",
+  "name": "Запуск приложений",
+  "name_en": "App Launcher",
+  "type": "utility",
+  "version": "1.0.0",
+  "author_name": "BlackAlex1",
+  "author": "https://github.com/blackalex1",
+  "author_url": "https://github.com/blackalex1",
+  "links": [
+    { "label": "GitHub", "url": "https://github.com/blackalex1" }
+  ],
+  "description": "Быстрый запуск программ на вашем ПК прямо с планшета.",
+  "description_en": "Quickly launch programs on your PC directly from your tablet.",
+  "has_settings": true,
+  "widgets": [
+    {
+      "id": "app_buttons",
+      "type": "button_group",
+      "label": "Панель макросов (Stream Deck)",
+      "label_en": "Macro Pad (Stream Deck)",
+      "buttons": [
+        {
+          "label": "Мут микрофона (Discord)",
+          "action": "hotkey",
+          "data": "ctrl+shift+m",
+          "icon": "MicOff"
+        },
+        {
+          "label": "Заглушить звук (Discord)",
+          "action": "hotkey",
+          "data": "ctrl+shift+d",
+          "icon": "VolumeX"
+        },
+        {
+          "label": "Свернуть все окна",
+          "action": "hotkey",
+          "data": "win+d",
+          "icon": "Monitor"
+        },
+        {
+          "label": "Диспетчер задач",
+          "action": "hotkey",
+          "data": "ctrl+shift+esc",
+          "icon": "Activity"
+        },
+        {
+          "label": "Закрыть активное окно",
+          "action": "hotkey",
+          "data": "alt+f4",
+          "icon": "XSquare"
+        }
+      ]
+    }
+  ]
+}
