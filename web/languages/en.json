@@ -132,5 +132,7 @@
     "sentinel_connecting": "Authorized, connecting...",
     "sentinel_auth_required": "Authentication required",
     "btn_save_and_connect": "Save and Connect",
-    "btn_logout": "Log Out"
+    "btn_logout": "Log Out",
+    "plugin_name_proxmox_sentinel": "Proxmox Sentinel",
+    "plugin_desc_proxmox_sentinel": "Proxmox VE (PVE Aegis) security monitoring, alert streaming, and audit log."
 }

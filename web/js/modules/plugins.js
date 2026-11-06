@@ -72,7 +72,7 @@ export async function editPluginConfig(pluginId) {
     const activePlugins = store.state.plugins || [];
     const pluginData = activePlugins.find(p => p.id === pluginId);
     const isActive = pluginData ? pluginData.active : false;
-    const customWizards = ['yandex_station', 'pc_disks', 'system_stats', 'keenetic_mihomo'];
+    const customWizards = ['yandex_station', 'pc_disks', 'system_stats', 'keenetic_mihomo', 'proxmox_sentinel'];
 
     if (customWizards.includes(pluginId) && !isActive) {
         showModal({

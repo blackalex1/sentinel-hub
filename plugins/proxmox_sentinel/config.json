@@ -1,0 +1,20 @@
+{
+    "id": "proxmox_sentinel",
+    "name": "Proxmox Sentinel",
+    "name_en": "Proxmox Sentinel",
+    "type": "monitoring",
+    "version": "1.0.0",
+    "author_name": "BlackAlex1",
+    "author_url": "https://github.com/blackalex1",
+    "description": "Прямой мониторинг безопасности, алерты и журнал аудита Proxmox VE (PVE Aegis).",
+    "has_settings": true,
+    "server_url": "https://192.168.1.89:8443",
+    "auto_connect": true,
+    "widgets": [
+        {
+            "id": "proxmox_sentinel",
+            "type": "security_monitoring",
+            "label": "Proxmox Sentinel"
+        }
+    ]
+}

@@ -41,7 +41,9 @@ class SentinelClient:
             headers = {
                 "User-Agent": "MonitHome/2.0 (Sentinel Plugin; Windows)"
             }
-            self._session = aiohttp.ClientSession(headers=headers)
+            # Разрешаем подключение по HTTPS к локальным серверам с самоподписанными SSL-сертификатами
+            connector = aiohttp.TCPConnector(ssl=False)
+            self._session = aiohttp.ClientSession(headers=headers, connector=connector)
         return self._session
 
     async def close(self):
@@ -67,7 +69,7 @@ class SentinelClient:
             "device_name": device_name
         }
         try:
-            async with session.post(url, json=payload, timeout=aiohttp.ClientTimeout(total=8.0)) as resp:
+            async with session.post(url, json=payload, ssl=False, timeout=aiohttp.ClientTimeout(total=8.0)) as resp:
                 data = await resp.json()
                 if resp.status == 200 and data.get("status") == "ok":
                     token = data.get("token")
@@ -92,7 +94,7 @@ class SentinelClient:
         url = f"{self.server_url}/auth/me"
         headers = {"Authorization": f"Bearer {target_token}"}
         try:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=5.0)) as resp:
+            async with session.get(url, headers=headers, ssl=False, timeout=aiohttp.ClientTimeout(total=5.0)) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     return True, data.get("username"), None
@@ -118,7 +120,7 @@ class SentinelClient:
             headers["Authorization"] = f"Bearer {self.token}"
             
         try:
-            async with session.get(url, headers=headers, timeout=aiohttp.ClientTimeout(total=5.0)) as resp:
+            async with session.get(url, headers=headers, ssl=False, timeout=aiohttp.ClientTimeout(total=5.0)) as resp:
                 if resp.status == 200:
                     data = await resp.json()
                     lines = data.get("lines")
@@ -193,7 +195,7 @@ class SentinelClient:
 
             logger.info(f"Connecting to Sentinel Connect WS: {ws_scheme}://{netloc}/remote/ws...")
             try:
-                async with session.ws_connect(ws_url, timeout=10.0, heartbeat=30.0) as ws:
+                async with session.ws_connect(ws_url, ssl=False, timeout=10.0, heartbeat=30.0) as ws:
                     self._ws = ws
                     self._set_connected(True)
                     retry_delay = 2.0
@@ -287,7 +289,7 @@ class SentinelClient:
             "payload": payload or {}
         }
         try:
-            async with session.post(url, json=req_body, headers=headers, timeout=aiohttp.ClientTimeout(total=4.0)) as resp:
+            async with session.post(url, json=req_body, headers=headers, ssl=False, timeout=aiohttp.ClientTimeout(total=4.0)) as resp:
                 return resp.status == 200
         except Exception as e:
             logger.error(f"Failed to send REST command: {e}")

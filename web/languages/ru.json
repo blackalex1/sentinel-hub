@@ -132,5 +132,7 @@
     "sentinel_connecting": "Авторизован, соединение...",
     "sentinel_auth_required": "Требуется авторизация",
     "btn_save_and_connect": "Сохранить и подключиться",
-    "btn_logout": "Выйти"
+    "btn_logout": "Выйти",
+    "plugin_name_proxmox_sentinel": "Proxmox Sentinel",
+    "plugin_desc_proxmox_sentinel": "Мониторинг безопасности Proxmox VE (PVE Aegis), стриминг алертов и журнал аудита."
 }

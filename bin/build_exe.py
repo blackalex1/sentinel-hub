@@ -57,6 +57,10 @@ def build_single_exe():
         if os.path.exists(work_path): shutil.rmtree(work_path)
         if os.path.exists(spec_path): os.remove(spec_path)
         print(f"\n[SUCCESS] Sentinel Hub built successfully -> {os.path.join(bin_folder, f'{output_name}.exe')}")
+        # Создаем также копию под именем MonitHome.exe для обратной совместимости
+        monithome_copy = os.path.join(bin_folder, "MonitHome.exe")
+        shutil.copyfile(os.path.join(bin_folder, f'{output_name}.exe'), monithome_copy)
+        print(f"[SUCCESS] Compatibility copy created -> {monithome_copy}")
     except subprocess.CalledProcessError as e:
         print(f"\n[ERROR] Build failed: {e}")
         sys.exit(1)

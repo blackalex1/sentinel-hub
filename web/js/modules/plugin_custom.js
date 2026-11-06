@@ -444,6 +444,66 @@ export const customHandlers = {
                 }
             }
         }
+    },
+    'proxmox_sentinel': {
+        render: (config) => {
+            modalContent.innerHTML = '<div class="loading-spinner"></div>';
+            socket.emit('plugin_command', { plugin_id: 'proxmox_sentinel', action: 'get_settings', data: {} });
+        },
+        onEvent: (payload) => {
+            if (payload.event === 'proxmox_settings_data') {
+                const { server_url, token, configured } = payload.data;
+                const statusBadge = configured
+                    ? '<span style="display:inline-block; padding:4px 10px; border-radius:12px; background:rgba(34,197,94,0.15); color:#4ade80; font-size:12px; font-weight:500;">🟢 Настроен</span>'
+                    : '<span style="display:inline-block; padding:4px 10px; border-radius:12px; background:rgba(239,68,68,0.15); color:#f87171; font-size:12px; font-weight:500;">🔴 Требуется настройка</span>';
+
+                modalContent.innerHTML = `
+                    <div class="sentinel-settings" style="text-align: left;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <span style="font-size: 13px; color: var(--text-muted);">Прямой защищенный WSS/HTTPS канал Proxmox Sentinel</span>
+                            ${statusBadge}
+                        </div>
+                        <div id="proxmox-settings-error" class="glass-panel" style="display: none; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.3); color: #f87171; padding: 12px; border-radius: 8px; margin-bottom: 15px; font-size: 13px;"></div>
+                        <div class="settings-group mb-4" style="display: flex; flex-direction: column; gap: 12px;">
+                            <div>
+                                <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">URL сервера Proxmox Sentinel (HTTPS):</label>
+                                <input type="text" id="proxmox-server-url" value="${server_url || 'https://192.168.1.89:8443'}" placeholder="https://192.168.1.89:8443" style="width: 100%; background: #020617; border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 6px; outline: none; font-size: 13px;">
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Bearer Token (минимум 16 символов):</label>
+                                <input type="password" id="proxmox-bearer-token" value="${token || ''}" placeholder="Введите Bearer токен" style="width: 100%; background: #020617; border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 6px; outline: none; font-size: 13px;">
+                            </div>
+                        </div>
+                        <button class="plugin-btn" style="width: 100%; background: var(--accent); color: white; padding: 12px; font-weight: bold;" id="save-proxmox-settings-btn">Сохранить настройки</button>
+                    </div>
+                `;
+
+                modalContent.querySelector('#save-proxmox-settings-btn').onclick = () => {
+                    const urlVal = modalContent.querySelector('#proxmox-server-url').value.trim();
+                    const tokenVal = modalContent.querySelector('#proxmox-bearer-token').value.trim();
+                    const errBox = modalContent.querySelector('#proxmox-settings-error');
+
+                    if (!urlVal) {
+                        errBox.style.display = 'block';
+                        errBox.textContent = 'Пожалуйста, укажите URL сервера Proxmox';
+                        return;
+                    }
+                    if (tokenVal && tokenVal.length < 16) {
+                        errBox.style.display = 'block';
+                        errBox.textContent = 'Длина Bearer токена должна быть не менее 16 символов';
+                        return;
+                    }
+
+                    socket.emit('plugin_command', {
+                        plugin_id: 'proxmox_sentinel',
+                        action: 'save_settings',
+                        data: { server_url: urlVal, token: tokenVal }
+                    });
+                    closeModal();
+                    showToast('Настройки Proxmox Sentinel сохранены', 'success');
+                };
+            }
+        }
     }
 };
 
