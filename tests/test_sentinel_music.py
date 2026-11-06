@@ -2,7 +2,11 @@ import pytest
 import asyncio
 from unittest.mock import MagicMock, AsyncMock, patch
 from plugins.sentinel_music.main import Plugin
-from plugins.sentinel_music.client import SentinelClient
+from plugins.sentinel_music.client import (
+    SentinelClient,
+    parse_token_input,
+    normalize_server_url
+)
 from core.event_bus import event_bus
 
 @pytest.fixture
@@ -16,14 +20,54 @@ def sentinel_plugin():
     plugin.set_secret = MagicMock(side_effect=lambda k, v: plugin._secrets.update({k: v}))
     return plugin
 
+def test_parse_token_input():
+    # 1. Plain token
+    tok, url, user = parse_token_input("my_test_token_123")
+    assert tok == "my_test_token_123"
+    assert url is None
+    assert user is None
+
+    # 2. Bearer prefix (case insensitive)
+    tok, _, _ = parse_token_input("Bearer enc:v1:abc123xyz")
+    assert tok == "enc:v1:abc123xyz"
+    tok, _, _ = parse_token_input("bearer simple_token")
+    assert tok == "simple_token"
+
+    # 3. Quoted token
+    tok, _, _ = parse_token_input('"enc:v1:quoted_token"')
+    assert tok == "enc:v1:quoted_token"
+
+    # 4. URL-encoded token
+    tok, _, _ = parse_token_input("enc%3Av1%3Aurl_encoded_token")
+    assert tok == "enc:v1:url_encoded_token"
+
+    # 5. Full JSON QR payload
+    qr_json = '{"url":"https://192.168.1.97:8000","token":"enc:v1:payload_token","username":"black"}'
+    tok, url, user = parse_token_input(qr_json)
+    assert tok == "enc:v1:payload_token"
+    assert url == "https://192.168.1.97:8000"
+    assert user == "black"
+
+    # 6. JSON with Bearer inside
+    qr_json_bearer = '{"url":"https://192.168.1.97:8000","token":"Bearer enc:v1:bearer_inside","username":"alex"}'
+    tok, url, user = parse_token_input(qr_json_bearer)
+    assert tok == "enc:v1:bearer_inside"
+    assert user == "alex"
+
+def test_normalize_server_url():
+    assert normalize_server_url("http://127.0.0.1:8000") == "http://127.0.0.1:8000"
+    assert normalize_server_url("https://192.168.1.97:8000/") == "https://192.168.1.97:8000"
+    assert normalize_server_url("https://192.168.1.97:8000/api") == "https://192.168.1.97:8000"
+    assert normalize_server_url("https://192.168.1.97:8000/api/") == "https://192.168.1.97:8000"
+    assert normalize_server_url("192.168.1.97:8000") == "http://192.168.1.97:8000"
+
 @pytest.mark.asyncio
 async def test_sentinel_login_and_save_settings(sentinel_plugin):
     plugin = sentinel_plugin
 
-    # Mock client methods
     with patch.object(plugin.client, "login", new_callable=AsyncMock) as mock_login, \
          patch.object(plugin.client, "start_ws") as mock_start_ws, \
-         patch.object(plugin.client, "disconnect_ws", new_callable=AsyncMock) as mock_disconnect_ws:
+         patch.object(plugin.client, "disconnect_ws", new_callable=AsyncMock):
 
         mock_login.return_value = (True, "test_token_123", "alice", None)
 
@@ -42,13 +86,48 @@ async def test_sentinel_login_and_save_settings(sentinel_plugin):
         finally:
             event_bus.unsubscribe("plugin_custom_event", on_event)
 
-        # Проверяем сохранение токена и конфигурации
         assert plugin.get_secret("SENTINEL_TOKEN") == "test_token_123"
         plugin.save_config.assert_called_with({"server_url": "http://192.168.1.50:8000"})
         assert plugin.is_authenticated is True
         assert plugin.auth_username == "alice"
         assert len(validation_events) == 1
         assert validation_events[0]["success"] is True
+        mock_start_ws.assert_called_once()
+
+@pytest.mark.asyncio
+async def test_sentinel_qr_payload_save_settings(sentinel_plugin):
+    plugin = sentinel_plugin
+
+    with patch.object(plugin.client, "verify_token", new_callable=AsyncMock) as mock_verify, \
+         patch.object(plugin.client, "start_ws") as mock_start_ws, \
+         patch.object(plugin.client, "disconnect_ws", new_callable=AsyncMock):
+
+        mock_verify.return_value = (True, "black", None)
+
+        qr_json = '{"url":"https://192.168.1.97:8000","token":"Bearer enc:v1:sample_aes_gcm_token","username":"black"}'
+
+        validation_events = []
+        async def on_event(payload):
+            if payload.get("plugin_id") == "sentinel_music" and payload.get("event") == "settings_validation_result":
+                validation_events.append(payload["data"])
+
+        event_bus.subscribe("plugin_custom_event", on_event)
+        try:
+            await plugin.handle_command("save_settings", {
+                "server_url": "http://127.0.0.1:8000",  # default url should be overridden by qr payload
+                "token": qr_json,
+                "auth_mode": "token"
+            })
+        finally:
+            event_bus.unsubscribe("plugin_custom_event", on_event)
+
+        assert plugin.get_secret("SENTINEL_TOKEN") == "enc:v1:sample_aes_gcm_token"
+        plugin.save_config.assert_called_with({"server_url": "https://192.168.1.97:8000"})
+        assert plugin.is_authenticated is True
+        assert plugin.auth_username == "black"
+        assert len(validation_events) == 1
+        assert validation_events[0]["success"] is True
+        mock_verify.assert_called_with("enc:v1:sample_aes_gcm_token")
         mock_start_ws.assert_called_once()
 
 @pytest.mark.asyncio
@@ -62,7 +141,6 @@ async def test_sentinel_state_broadcast(sentinel_plugin):
 
     event_bus.subscribe("plugin_state_changed", on_state)
     try:
-        # Симулируем получение обновления устройств через Sentinel Connect
         sample_devices = [
             {
                 "id": "station_kitchen",
@@ -84,7 +162,6 @@ async def test_sentinel_state_broadcast(sentinel_plugin):
         with patch.object(plugin.client, "get_lyrics", new_callable=AsyncMock) as mock_lyrics:
             mock_lyrics.return_value = [{"time": 1000, "text": "Is this the real life?"}]
             await plugin._on_devices_update(sample_devices)
-            # Даем фоновой таске загрузки текстов выполниться
             await asyncio.sleep(0.05)
 
     finally:
@@ -101,7 +178,7 @@ async def test_sentinel_state_broadcast(sentinel_plugin):
     assert dev["progress"] == 60.0
     assert dev["duration"] == 354.0
     assert dev["volume"] == 75
-    assert dev["cover"] == "http://127.0.0.1:8000/covers/42?size=300"
+    assert dev["cover"] == "http://127.0.0.1:8000/api/covers/42?size=300"
     assert len(dev["timings"]) == 1
     assert dev["timings"][0]["text"] == "Is this the real life?"
 

@@ -329,7 +329,7 @@ export const customHandlers = {
 
                                 <div id="container-token" style="display: none; flex-direction: column; gap: 10px;">
                                     <div>
-                                        <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Session Token (enc:v1:... или токен):</label>
+                                        <label style="font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 5px;">Session Token (enc:v1:... или JSON сопряжения):</label>
                                         <input type="password" id="sm-token" value="${has_token ? '******' : ''}" placeholder="${has_token ? '••••••••' : 'Вставьте токен'}" style="width: 100%; background: #020617; border: 1px solid var(--border-color); color: white; padding: 10px; border-radius: 6px; outline: none; font-size: 13px;">
                                     </div>
                                 </div>
@@ -370,8 +370,19 @@ export const customHandlers = {
                 const contLogin = modalContent.querySelector('#container-login');
                 const contToken = modalContent.querySelector('#container-token');
 
+                let activeAuthTab = has_token ? 'token' : 'login';
+                if (has_token) {
+                    tabToken.style.background = 'var(--accent)';
+                    tabToken.style.color = 'white';
+                    tabLogin.style.background = 'rgba(255,255,255,0.05)';
+                    tabLogin.style.color = 'var(--text-muted)';
+                    contLogin.style.display = 'none';
+                    contToken.style.display = 'flex';
+                }
+
                 if (tabLogin && tabToken) {
                     tabLogin.onclick = () => {
+                        activeAuthTab = 'login';
                         tabLogin.style.background = 'var(--accent)';
                         tabLogin.style.color = 'white';
                         tabToken.style.background = 'rgba(255,255,255,0.05)';
@@ -381,6 +392,7 @@ export const customHandlers = {
                     };
 
                     tabToken.onclick = () => {
+                        activeAuthTab = 'token';
                         tabToken.style.background = 'var(--accent)';
                         tabToken.style.color = 'white';
                         tabLogin.style.background = 'rgba(255,255,255,0.05)';
@@ -411,7 +423,8 @@ export const customHandlers = {
                             server_url: serverUrl,
                             username: username,
                             password: password,
-                            token: token
+                            token: token,
+                            auth_mode: activeAuthTab
                         }
                     });
                 };

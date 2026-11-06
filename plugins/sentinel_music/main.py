@@ -4,7 +4,7 @@ import time
 from typing import Any, Dict, List, Optional
 from plugin_engine.base_plugin import BasePlugin
 from core.event_bus import event_bus
-from .client import SentinelClient
+from .client import SentinelClient, parse_token_input, normalize_server_url
 
 class Plugin(BasePlugin):
     """
@@ -32,10 +32,11 @@ class Plugin(BasePlugin):
 
     async def on_start(self):
         config = self.get_config()
-        server_url = config.get("server_url", "http://127.0.0.1:8000")
+        server_url = normalize_server_url(config.get("server_url", "http://127.0.0.1:8000"))
         token = self.get_secret("SENTINEL_TOKEN", "")
+        clean_token, _, _ = parse_token_input(token)
         
-        self.client.set_config(server_url, token if token else None)
+        self.client.set_config(server_url, clean_token if clean_token else None)
         self.log(f"Sentinel Music plugin starting. Server: {server_url}")
 
         # Первоначальная проверка аутентификации и запуск
@@ -67,10 +68,13 @@ class Plugin(BasePlugin):
             await self._broadcast_current_state()
             return
 
-        is_valid, username, err = await self.client.verify_token(token)
+        clean_token, _, _ = parse_token_input(token)
+        is_valid, username, err = await self.client.verify_token(clean_token)
         if is_valid:
             self.is_authenticated = True
             self.auth_username = username
+            self.client.token = clean_token
+            self.set_secret("SENTINEL_TOKEN", clean_token)
             self.log(f"Authenticated on Sentinel as '{username}'. Starting Sentinel Connect...")
             self.client.start_ws()
         else:
@@ -151,7 +155,7 @@ class Plugin(BasePlugin):
             
             cover_url = ""
             if track_id:
-                cover_url = f"{self.client.server_url}/covers/{track_id}?size=300"
+                cover_url = f"{self.client.server_url}/api/covers/{track_id}?size=300"
             elif track.get("cover_url"):
                 cover_url = track.get("cover_url")
                 if cover_url.startswith("/"):
@@ -256,13 +260,18 @@ class Plugin(BasePlugin):
             await self._handle_playback_command(action, data)
 
     async def _handle_save_settings(self, payload: Dict[str, Any]):
-        server_url = payload.get("server_url", "").strip().rstrip("/")
-        if not server_url:
-            server_url = "http://127.0.0.1:8000"
-
+        raw_url = payload.get("server_url", "")
         username = (payload.get("username") or "").strip()
         password = payload.get("password") or ""
         token_input = (payload.get("token") or "").strip()
+        auth_mode = payload.get("auth_mode", "")
+
+        clean_token, extracted_url, extracted_user = parse_token_input(token_input)
+
+        server_url = raw_url.strip()
+        if extracted_url and (not server_url or server_url == "http://127.0.0.1:8000"):
+            server_url = extracted_url
+        server_url = normalize_server_url(server_url)
 
         # Сохраняем URL сервера
         self.save_config({"server_url": server_url})
@@ -270,8 +279,25 @@ class Plugin(BasePlugin):
 
         target_token = None
 
-        # Сценарий А: Вход по логину и паролю
-        if username and password and password != "******":
+        # Режим токена: если передан флаг auth_mode=='token', либо передан clean_token и пароль пустой/дефолтный
+        is_token_mode = (auth_mode == "token") or (clean_token and (not password or password == "******"))
+
+        # Сценарий А: Ввод токена напрямую или через QR
+        if is_token_mode and clean_token and clean_token != "******":
+            self.log(f"Validating provided token on {server_url}...")
+            ok, user, err = await self.client.verify_token(clean_token)
+            if not ok:
+                await self.emit_event("settings_validation_result", {
+                    "success": False,
+                    "message": f"Неверный токен: {err}"
+                })
+                return
+            target_token = clean_token
+            self.auth_username = user or extracted_user
+            self.is_authenticated = True
+
+        # Сценарий Б: Вход по логину и паролю
+        elif username and password and password != "******":
             self.log(f"Attempting login to {server_url} as {username}...")
             ok, tok, user, err = await self.client.login(username, password)
             if not ok:
@@ -280,21 +306,8 @@ class Plugin(BasePlugin):
                     "message": f"Ошибка авторизации: {err}"
                 })
                 return
-            target_token = tok
-            self.auth_username = user
-            self.is_authenticated = True
-
-        # Сценарий Б: Ввод токена напрямую
-        elif token_input and token_input != "******":
-            self.log(f"Validating provided token on {server_url}...")
-            ok, user, err = await self.client.verify_token(token_input)
-            if not ok:
-                await self.emit_event("settings_validation_result", {
-                    "success": False,
-                    "message": f"Неверный токен: {err}"
-                })
-                return
-            target_token = token_input
+            clean_tok, _, _ = parse_token_input(tok)
+            target_token = clean_tok
             self.auth_username = user
             self.is_authenticated = True
 
@@ -302,9 +315,10 @@ class Plugin(BasePlugin):
         else:
             existing_token = self.get_secret("SENTINEL_TOKEN", "")
             if existing_token:
-                ok, user, err = await self.client.verify_token(existing_token)
+                clean_existing, _, _ = parse_token_input(existing_token)
+                ok, user, err = await self.client.verify_token(clean_existing)
                 if ok:
-                    target_token = existing_token
+                    target_token = clean_existing
                     self.auth_username = user
                     self.is_authenticated = True
                 else:
