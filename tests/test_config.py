@@ -48,3 +48,22 @@ def test_secrets_encryption(temp_config_manager):
     raw_secret = temp_config_manager.db.get_raw_secret("API_KEY")
     assert raw_secret is not None
     assert original_secret.encode() not in raw_secret  # Secret should not be in plaintext
+
+def test_legacy_secret_migration(temp_config_manager):
+    from Crypto.Cipher import AES
+    legacy_secret = "legacy_secret_token_abc"
+    
+    # Encrypt with legacy key
+    cipher = AES.new(temp_config_manager._legacy_encryption_key, AES.MODE_GCM)
+    ciphertext, tag = cipher.encrypt_and_digest(legacy_secret.encode('utf-8'))
+    legacy_raw = cipher.nonce + tag + ciphertext
+    temp_config_manager.db.set_raw_secret("LEGACY_KEY", legacy_raw)
+
+    # get_secret should decrypt with legacy key and automatically re-encrypt with modern key
+    retrieved = temp_config_manager.get_secret("LEGACY_KEY")
+    assert retrieved == legacy_secret
+
+    # Verify that DB now contains modern encrypted bytes
+    migrated_raw = temp_config_manager.db.get_raw_secret("LEGACY_KEY")
+    assert migrated_raw != legacy_raw
+    assert temp_config_manager._decrypt_with_key(migrated_raw, temp_config_manager._encryption_key) == legacy_secret

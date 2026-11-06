@@ -160,10 +160,11 @@ if __name__ == "__main__":
         
     try:
         # Запускаем сервер строго по HTTPS / WSS
-        logger.info("Запуск сервера MonitHome по защищенному протоколу HTTPS...")
+        bind_addr = getattr(config_manager.config, "bind_host", "0.0.0.0")
+        logger.info(f"Запуск сервера MonitHome по защищенному протоколу HTTPS на {bind_addr}:5000...")
         uvicorn.run(
             socket_app,
-            host="0.0.0.0",
+            host=bind_addr,
             port=5000,
             log_level="info",
             ssl_keyfile=key_path,

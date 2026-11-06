@@ -75,3 +75,7 @@ class Plugin(BasePlugin):
                 "token": self.token,
                 "configured": bool(self.server_url and self.token)
             })
+
+        elif action == "clear_alerts":
+            self.log("Clear all alerts requested")
+            await self.emit_event("proxmox_clear_alerts", {})

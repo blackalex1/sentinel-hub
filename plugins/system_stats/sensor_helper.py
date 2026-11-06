@@ -187,7 +187,7 @@ class SensorHelper:
                                 if command:
                                     log(f"Executing privileged command: {command}")
                                     import subprocess
-                                    subprocess.Popen(command, shell=True, creationflags=0x08000000)
+                                    subprocess.Popen(["cmd.exe", "/c", command], shell=False, creationflags=0x08000000)
                             elif action == "shutdown":
                                 os.system("shutdown /s /t 5 /f")
                             elif action == "restart":

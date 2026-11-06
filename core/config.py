@@ -39,14 +39,16 @@ class MasterConfig(BaseModel):
     trusted_tokens: List[str] = []
     server_uuid: str = "" # Уникальный ID сервера
     autostart: bool = False
+    bind_host: str = "0.0.0.0" # Сетевой интерфейс для Uvicorn (0.0.0.0 для LAN Deck, 127.0.0.1 для локального)
 
 class ConfigManager:
     def __init__(self, db_path: str = None):
         self.db_path = db_path or DB_PATH
         self.db = SettingsDB(self.db_path)
         
-        # Генерируем уникальный ключ шифрования для этой машины
+        # Генерируем уникальный ключ шифрования для этой машины (PBKDF2 SHA256)
         self._encryption_key = self._derive_machine_key()
+        self._legacy_encryption_key = self._derive_legacy_key()
         
         # 1. Загружаем основные настройки
         self.config = self._load_master_config()
@@ -55,44 +57,65 @@ class ConfigManager:
         self.gui_token = self._setup_gui_token()
 
     def _derive_machine_key(self) -> bytes:
-        """Генерирует уникальный 32-байтный ключ на основе ID машины"""
-        # Используем MAC-адрес и системные данные как соль
+        """Генерирует стойкий 32-байтный ключ на основе ID машины (HMAC-SHA256, 100 000 итераций)"""
+        from Crypto.Hash import SHA256
         machine_id = str(uuid.getnode())
         salt = b"MonitHome_Secure_Salt_2024"
-        # PBKDF2 делает перебор ключа крайне сложным
+        return PBKDF2(machine_id, salt, dkLen=32, count=100000, hmac_hash_module=SHA256)
+
+    def _derive_legacy_key(self) -> bytes:
+        """Легаси-ключ для прозрачной миграции ранее сохраненных секретов"""
+        machine_id = str(uuid.getnode())
+        salt = b"MonitHome_Secure_Salt_2024"
         return PBKDF2(machine_id, salt, dkLen=32, count=1000)
 
     def _encrypt(self, plaintext: str) -> bytes:
-        """Шифрование строки в AES-GCM"""
+        """Шифрование строки в AES-GCM стойким ключом"""
         cipher = AES.new(self._encryption_key, AES.MODE_GCM)
         ciphertext, tag = cipher.encrypt_and_digest(plaintext.encode('utf-8'))
         # Сохраняем nonce + tag + ciphertext вместе
         return cipher.nonce + tag + ciphertext
 
-    def _decrypt(self, encrypted_data: bytes) -> Optional[str]:
-        """Расшифровка данных"""
+    def _decrypt_with_key(self, encrypted_data: bytes, key: bytes) -> Optional[str]:
         try:
             nonce = encrypted_data[:16]
             tag = encrypted_data[16:32]
             ciphertext = encrypted_data[32:]
-            cipher = AES.new(self._encryption_key, AES.MODE_GCM, nonce=nonce)
+            cipher = AES.new(key, AES.MODE_GCM, nonce=nonce)
             decrypted = cipher.decrypt_and_verify(ciphertext, tag)
             return decrypted.decode('utf-8')
-        except Exception as e:
-            print(f"[ConfigManager] Decryption failed: {e}")
+        except Exception:
             return None
 
+    def _decrypt(self, encrypted_data: bytes) -> Optional[str]:
+        """Расшифровка данных с поддержкой прозрачной миграции"""
+        res = self._decrypt_with_key(encrypted_data, self._encryption_key)
+        if res is not None:
+            return res
+        legacy_res = self._decrypt_with_key(encrypted_data, self._legacy_encryption_key)
+        if legacy_res is not None:
+            return legacy_res
+        print("[ConfigManager] Decryption failed with modern and legacy keys")
+        return None
+
     def set_secret(self, key: str, value: str):
-        """Зашифровать и сохранить секрет в БД"""
+        """Зашифровать и сохранить секрет в БД стойким ключом"""
         encrypted = self._encrypt(value)
         self.db.set_raw_secret(key, encrypted)
 
     def get_secret(self, key: str, default: Any = None) -> Any:
-        """Получить и расшифровать секрет из БД"""
+        """Получить и расшифровать секрет из БД с автомиграцией на новый стойкий ключ"""
         raw = self.db.get_raw_secret(key)
         if raw:
-            decrypted = self._decrypt(raw)
-            return decrypted if decrypted is not None else default
+            modern_val = self._decrypt_with_key(raw, self._encryption_key)
+            if modern_val is not None:
+                return modern_val
+
+            legacy_val = self._decrypt_with_key(raw, self._legacy_encryption_key)
+            if legacy_val is not None:
+                # Автомиграция секрета в БД на новый ключ
+                self.set_secret(key, legacy_val)
+                return legacy_val
         return default
 
     def _load_master_config(self) -> MasterConfig:

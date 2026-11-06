@@ -488,8 +488,21 @@ export const customHandlers = {
                             </div>
                         </div>
                         <button class="plugin-btn" style="width: 100%; background: var(--accent); color: white; padding: 12px; font-weight: bold;" id="save-proxmox-settings-btn">Сохранить настройки</button>
+                        <button class="plugin-btn" style="width: 100%; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #f87171; padding: 10px; font-weight: 500; margin-top: 10px;" id="clear-proxmox-alerts-btn">🗑️ Очистить все алерты</button>
                     </div>
                 `;
+
+                const clearBtn = modalContent.querySelector('#clear-proxmox-alerts-btn');
+                if (clearBtn) {
+                    clearBtn.onclick = () => {
+                        socket.emit('plugin_command', {
+                            plugin_id: 'proxmox_sentinel',
+                            action: 'clear_alerts',
+                            data: {}
+                        });
+                        showToast('Команда очистки алертов Proxmox отправлена', 'info');
+                    };
+                }
 
                 modalContent.querySelector('#save-proxmox-settings-btn').onclick = () => {
                     const urlVal = modalContent.querySelector('#proxmox-server-url').value.trim();

@@ -44,3 +44,10 @@ async def test_proxmox_sentinel_save_settings(proxmox_plugin):
             "success": True,
             "message": "Настройки Proxmox Sentinel успешно сохранены"
         })
+
+@pytest.mark.asyncio
+async def test_proxmox_sentinel_clear_alerts(proxmox_plugin):
+    plugin = proxmox_plugin
+    with patch.object(plugin, "emit_event", new_callable=AsyncMock) as mock_emit_event:
+        await plugin.handle_command("clear_alerts", {})
+        mock_emit_event.assert_called_once_with("proxmox_clear_alerts", {})

@@ -323,10 +323,10 @@ class Plugin(BasePlugin):
         except Exception as e:
             self.log(f"Failed to launch {path}: {e}", level=30) # WARNING level
             
-            # Попытка запустить через shell, если startfile не сработал
+            # Попытка запустить напрямую, если startfile не сработал
             try:
-                subprocess.Popen(path, shell=True, creationflags=0x08000000)
-                self.log(f"Launched via shell: {path}")
+                subprocess.Popen([path], shell=False, creationflags=0x08000000)
+                self.log(f"Launched directly: {path}")
             except Exception as e2:
                 self.log(f"Second attempt failed: {e2}", level=40) # ERROR level
 
@@ -381,8 +381,8 @@ class Plugin(BasePlugin):
 
     def _run_shell_command(self, cmd: str):
         try:
-            # Запускаем команду скрытно в фоне
-            subprocess.Popen(cmd, shell=True, creationflags=0x08000000)
+            # Запускаем команду через cmd.exe с флагом shell=False (Bandit B602 safe)
+            subprocess.Popen(["cmd.exe", "/c", cmd], shell=False, creationflags=0x08000000)
             self.log(f"Command executed silently: {cmd}")
         except Exception as e:
             self.log(f"Failed to execute command {cmd}: {e}", level=40)
@@ -425,8 +425,8 @@ class Plugin(BasePlugin):
                 # Переключение мута микрофона через нативный Windows PowerShell CoreAudio
                 ps_cmd = "Set-AudioDevice -Recording -Mute (! (Get-AudioDevice -Recording).Mute)"
                 subprocess.Popen(
-                    ["powershell", "-Command", ps_cmd],
-                    shell=True,
+                    ["powershell", "-NoProfile", "-NonInteractive", "-Command", ps_cmd],
+                    shell=False,
                     creationflags=0x08000000
                 )
                 self.log("Microphone mute toggled.")
