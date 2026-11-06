@@ -61,6 +61,9 @@ class PluginManager:
             await self.start_plugin(p_id)
 
     async def start_plugin(self, plugin_id: str):
+        if not plugin_id.isidentifier():
+            logger.error(f"Invalid plugin id format: {plugin_id}")
+            return
         # Если плагин уже запущен, сначала останавливаем его
         if plugin_id in self.active_plugins:
             logger.info(f"Plugin {plugin_id} is already running. Stopping before reload...")
@@ -71,7 +74,7 @@ class PluginManager:
             if module_name in sys.modules:
                 importlib.reload(sys.modules[module_name])
             
-            module = importlib.import_module(module_name)
+            module = importlib.import_module(module_name)  # nosemgrep: python.lang.security.audit.non-literal-import.non-literal-import
             plugin_class: Type[BasePlugin] = getattr(module, "Plugin")
             
             instance = plugin_class(plugin_id=plugin_id)

@@ -71,7 +71,7 @@ class MonitSettingsForm extends HTMLElement {
                 body: JSON.stringify({ [key]: value })
             });
         } catch (err) {
-            console.error(`Failed to save ${key}`, err);
+            console.error('Failed to save config field:', key, err);
         }
     }
 

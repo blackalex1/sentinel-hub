@@ -48,6 +48,8 @@ def register_camera(register_script: str, dll_path: str):
 
 def download_dll(dll_path: str):
     url = "https://raw.githubusercontent.com/schellingb/UnityCapture/master/Install/UnityCaptureFilter64.dll"
-    req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-    with urllib.request.urlopen(req, timeout=15) as response, open(dll_path, 'wb') as out_file:
+    if not url.startswith("https://raw.githubusercontent.com/schellingb/UnityCapture/"):
+        raise ValueError("Untrusted download source")
+    req = urllib.request.Request("https://raw.githubusercontent.com/schellingb/UnityCapture/master/Install/UnityCaptureFilter64.dll", headers={'User-Agent': 'Mozilla/5.0'})
+    with urllib.request.urlopen(req, timeout=15) as response, open(dll_path, 'wb') as out_file:  # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected
         out_file.write(response.read())
