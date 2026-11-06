@@ -355,7 +355,7 @@ class CustomTitleBar(QWidget):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle("MonitHome Dashboard")
+        self.setWindowTitle("Sentinel Hub")
         
         # Путь к иконке (используем абсолютный BUNDLE_DIR из конфига)
         from core.config import BUNDLE_DIR

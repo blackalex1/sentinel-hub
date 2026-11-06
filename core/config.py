@@ -14,9 +14,9 @@ if getattr(sys, 'frozen', False):
     BUNDLE_DIR = sys._MEIPASS 
 else:
     # Если запущено как скрипт
-    # BASE_DIR - корень проекта
-    BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-    BUNDLE_DIR = os.path.join(BASE_DIR, "pc_v2")
+    # BASE_DIR - корень проекта (sentinel-hub)
+    BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    BUNDLE_DIR = BASE_DIR
 
 DB_PATH = os.path.join(BASE_DIR, "database.db")
 
