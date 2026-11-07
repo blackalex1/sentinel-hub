@@ -76,7 +76,8 @@ async def test_media_scanner_memory_limit_exceeded(mock_process, mock_volume, mo
     mock_vol_instance.get_info.return_value = (50, False)
     mock_volume.return_value = mock_vol_instance
     
-    mock_session_manager.request_async = AsyncMock()
+    mock_manager = MagicMock()
+    mock_session_manager.request_async = AsyncMock(return_value=mock_manager)
     
     # Mock time to simulate 31 seconds passing on the first loop iteration
     time_values = [0, 31, 32, 33]
